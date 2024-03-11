@@ -15,6 +15,7 @@ class Program
 class Game
 {
     private Snake _snake = new Snake();
+    private Apple _apple = new Apple();
     
     public async Task GameLoop()
     {
@@ -71,7 +72,7 @@ class Game
             
             await Task.Delay(700);
             Console.Clear();
-            _snake.Movement();
+            _snake.Movement(CheckFood());
             
             DisplayGrid();
 
@@ -101,13 +102,16 @@ class Game
             new List<string> {"\u25a1", "\u25a1", "\u25a1", "\u25a1", "\u25a1", "\u25a1", "\u25a1", "\u25a1" },
         };
         
-        // змійка на мапі
+        // snake on a map
         foreach (var cord in _snake.Cords)
         {
             int row = cord[0];
             int col = cord[1];
-            Grid[row][col] = "\u25cf"; 
+            Grid[row][col] = "x"; 
         }
+        
+        // apple on a map
+        Grid[_apple.Cords[0]][_apple.Cords[1]] = "\u25cf";
         
         // displaying field
         for (int i = 0; i < Grid.Count; i++)
@@ -118,6 +122,34 @@ class Game
             }
             Console.WriteLine();
         }
+    }
+    
+    private bool CheckFood()
+    {
+        List<int> lastSnakeCoordinate = _snake.Cords.Last();
+        
+        if (lastSnakeCoordinate[0] == _apple.Cords[0] && lastSnakeCoordinate[1] == _apple.Cords[1])
+            return true;
+
+        
+        return false;
+    }
+}
+
+class Apple
+{
+    public List<int> Cords = new List<int>();
+
+    public Apple()
+    {
+        GenerateApple();
+    }
+
+    public void GenerateApple()
+    {
+        Random random = new Random();
+        Cords.Add(random.Next(0, 8));
+        Cords.Add(random.Next(0, 8));
     }
 }
 class Snake
@@ -131,25 +163,32 @@ class Snake
         MovementDirection = 6;
     }
 
-    public void Movement()
+    public void Movement(bool arg)
     {
+        List<int> lastSnakeCoordinate = Cords.Last();
+
+        
         switch (MovementDirection)
         {
             case 12:
-                Cords.Add(new List<int> { Cords[0][0]--, Cords[0][1] });
-                Cords.RemoveAt(Cords.Count - 1);
+                Cords.Add(new List<int> { lastSnakeCoordinate[0]--, lastSnakeCoordinate[1] });
+                if (arg == false)
+                    Cords.RemoveAt(Cords.Count-1);
                 break;
             case 6:
-                Cords.Add(new List<int> { Cords[0][0]++, Cords[0][1] });
-                Cords.RemoveAt(Cords.Count - 1);
+                Cords.Add(new List<int> { lastSnakeCoordinate[0]++, lastSnakeCoordinate[1] });
+                if (arg == false)
+                    Cords.RemoveAt(Cords.Count-1);
                 break;
             case 3:
-                Cords.Add(new List<int> { Cords[0][0], Cords[0][1]++ });
-                Cords.RemoveAt(Cords.Count - 1);
+                Cords.Add(new List<int> { lastSnakeCoordinate[0], lastSnakeCoordinate[1]++ });
+                if (arg == false)
+                    Cords.RemoveAt(Cords.Count-1);
                 break;
             case 9:
-                Cords.Add(new List<int> { Cords[0][0], Cords[0][1]-- });
-                Cords.RemoveAt(Cords.Count - 1);
+                Cords.Add(new List<int> { lastSnakeCoordinate[0], lastSnakeCoordinate[1]-- });
+                if (arg == false)
+                    Cords.RemoveAt(Cords.Count-1);
                 break;
         }
     }
